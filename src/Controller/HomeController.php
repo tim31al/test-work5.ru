@@ -12,4 +12,10 @@ class HomeController extends AbstractController
         include $this->templatesDir.'home.php';
     }
 
+    public function notFound()
+    {
+        $title = 'Not found';
+        include $this->templatesDir.'not-found.php';
+    }
+
 }
