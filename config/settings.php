@@ -10,4 +10,5 @@ return [
         'password' => getenv('DB_PASSWORD'),
     ],
     'templates_dir' => __DIR__.'/../templates/',
+    'layout' => 'layout.php'
 ];

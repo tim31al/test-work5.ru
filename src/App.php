@@ -3,10 +3,12 @@
 namespace App;
 
 use App\Controller\HomeController;
+use App\Controller\SecurityController;
 use App\Controller\UserController;
 use App\Service\Container;
 use App\Service\Interfaces\ContainerInterface;
-use App\Service\Session;
+use App\Service\Interfaces\SessionInterface;
+
 
 class App
 {
@@ -24,8 +26,8 @@ class App
 
     public function run()
     {
-        $session = $this->container->get(Session::class);
-        $session->run();
+        $session = $this->container->get(SessionInterface::class);
+        $session->start();
 
         $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -35,18 +37,15 @@ class App
                 $controller->index();
                 break;
             case '/register':
-                /** @var UserController $controller */
-                $controller = $this->container->get(UserController::class);
+                $controller = $this->container->get(SecurityController::class);
                 $controller->register();
                 break;
             case '/login':
-                /** @var UserController $controller */
-                $controller = $this->container->get(UserController::class);
+                $controller = $this->container->get(SecurityController::class);
                 $controller->login();
                 break;
             case '/logout':
-                /** @var UserController $controller */
-                $controller = $this->container->get(UserController::class);
+                $controller = $this->container->get(SecurityController::class);
                 $controller->logout();
                 break;
             case '/profile':

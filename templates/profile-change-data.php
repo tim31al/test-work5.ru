@@ -3,8 +3,6 @@
 /** @var string $error  */
 ?>
 
-<?php ob_start(); ?>
-
 <form method="post" action="/profile?change_data">
 
     	<div class="field">
@@ -26,10 +24,5 @@
 </form>
 
 <?php if($error): ?>
-<p style="color: red"><?= $error ?></p>
+<p class="error"><?= $error ?></p>
 <?php endif; ?>
-
-
-<?php $content = ob_get_clean(); ?>
-
-<?php include 'layout.php' ?>

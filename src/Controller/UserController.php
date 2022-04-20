@@ -3,104 +3,54 @@
 namespace App\Controller;
 
 use App\Model\User;
-use App\Model\UserValidationException;
-use App\Service\Session;
+use App\Service\Interfaces\ContainerInterface;
+use App\Utils\UserValidationException;
 
 class UserController extends AbstractController
 {
-    private const SESSION_KEY = 'user';
+    private const TITLE = 'Профиль пользователя';
 
     private User $model;
-    private Session $session;
 
     /**
-     * @param \App\Model\User $model
+     * @param \App\Service\Interfaces\ContainerInterface $container
      */
-    public function __construct(string $templateDir, User $model, Session $session)
+    public function __construct(ContainerInterface $container)
     {
-        parent::__construct($templateDir);
-        $this->model = $model;
-        $this->session = $session;
-    }
-
-    public function register()
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $data = [
-                'firstname' => '',
-                'lastname' => '',
-                'email' => '',
-                'password' => ''
-            ];
-
-        } else {
-            $data = $_POST;
-            try {
-                $isRegister = $this->model->create($data);
-            } catch (UserValidationException $e) {
-                $error = $e->getMessage();
-            }
-        }
-
-
-        $title = 'Регистрация';
-        include $this->templatesDir . 'register.php';
-    }
-
-    public function logout()
-    {
-        $this->session->remove(static::SESSION_KEY);
-        header('Location: /');
-    }
-
-    public function login()
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $data = [
-                'email' => '',
-                'password' => ''
-            ];
-        } else {
-            $data = $_POST;
-            try {
-                $user = $this->model->getUser($data);
-                $this->setUser($user);
-
-                header('Location: /profile');
-
-            } catch (UserValidationException $e) {
-                $error = $e->getMessage();
-            }
-        }
-
-        $title = 'Вход';
-        include $this->templatesDir . 'login.php';
+        parent::__construct($container);
+        $this->model = $container->get(User::class);
     }
 
     public function profile()
     {
-        $userStored = $this->session->get(static::SESSION_KEY);
+        $user = $this->getUser();
 
-        if (!$userStored) {
+        if (!$user) {
             header('Location: /login');
         }
 
-        $title = 'Профиль пользователя';
-        $user = json_decode($userStored, true);
 
         $uri = $_SERVER['REQUEST_URI'];
+
         if (strpos($uri, 'change_data')) {
             $this->changeData($user);
-        } elseif (strpos($uri, 'change_pass')) {
-            $this->changePassword($user);
-        } else {
-            include $this->templatesDir . 'profile.php';
+            return;
         }
+
+        if (strpos($uri, 'change_pass')) {
+            $this->changePassword($user);
+            return;
+        }
+
+        $this->render('profile.php', [
+            'title' => static::TITLE,
+            'user' => $user,
+        ]);
     }
 
     private function changeData(array $userData)
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($this->isPost()) {
             $data = $_POST;
             $data['email'] = $userData['email'];
 
@@ -110,24 +60,28 @@ class UserController extends AbstractController
 
                 header('Location: /profile');
             } catch (UserValidationException $e) {
-                $user = $data;
                 $error = $e->getMessage();
-                include $this->templatesDir . 'profile-change-data.php';
             }
         } else {
-            $user = $userData;
-            include $this->templatesDir . 'profile-change-data.php';
+            $data = $userData;
         }
+
+        $this->render('profile-change-data.php', [
+            'title' => static::TITLE,
+            'user' => $data,
+            'error' => $error ?? null,
+        ]);
+
     }
 
     private function changePassword(array $userData)
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($this->isPost()) {
             $data = $_POST;
             $data['email'] = $userData['email'];
 
             try {
-                if($this->model->updatePassword($data)) {
+                if ($this->model->updatePassword($data)) {
                     header('Location: /profile');
                 }
             } catch (UserValidationException $e) {
@@ -135,14 +89,9 @@ class UserController extends AbstractController
             }
         }
 
-        include $this->templatesDir . 'profile-change-pass.php';
+        $this->render('profile-change-pass.php', [
+            'title' => 'Сменить пароль',
+            'error' => $error ?? null,
+        ]);
     }
-
-    private function setUser(array $user)
-    {
-        unset($user['password']);
-        $userData = json_encode($user);
-        $this->session->set(static::SESSION_KEY, $userData);
-    }
-
 }

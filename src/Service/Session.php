@@ -2,9 +2,11 @@
 
 namespace App\Service;
 
-class Session
+use App\Service\Interfaces\SessionInterface;
+
+class Session implements SessionInterface
 {
-    public function run()
+    public function start()
     {
         session_start();
     }

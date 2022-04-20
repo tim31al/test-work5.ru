@@ -1,10 +1,13 @@
 <?php
 
 use App\Controller\HomeController;
+use App\Controller\SecurityController;
 use App\Controller\UserController;
 use App\Model\User;
 use App\Service\Interfaces\ContainerInterface;
+use App\Service\Interfaces\SessionInterface;
 use App\Service\Session;
+use App\Utils\UserValidator;
 
 
 return [
@@ -29,27 +32,24 @@ return [
 
     User::class => function (ContainerInterface $container): User {
         $pdo = $container->get(PDO::class);
+        $validator = new UserValidator();
 
-        return new User($pdo);
+        return new User($pdo, $validator);
     },
 
-    Session::class => function(): Session {
+    SessionInterface::class => function (): SessionInterface {
         return new Session();
     },
 
     HomeController::class => function (ContainerInterface $container): HomeController {
-        $templatesDir = $container->get('templates_dir');
+        return new HomeController($container);
+    },
 
-        return new HomeController($templatesDir);
+    SecurityController::class => function (ContainerInterface $container): SecurityController {
+        return new SecurityController($container);
     },
 
     UserController::class => function (ContainerInterface $container): UserController {
-        $templatesDir = $container->get('templates_dir');
-        $model = $container->get(User::class);
-        $session = $container->get(Session::class);
-
-        return new UserController($templatesDir, $model, $session);
+        return new UserController($container);
     },
-
-
 ];

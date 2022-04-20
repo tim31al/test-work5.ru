@@ -6,16 +6,17 @@ class HomeController extends AbstractController
 {
     public function index()
     {
-        $title = 'Home';
-        $message = 'Welcome Home';
-
-        include $this->templatesDir.'home.php';
+        $this->render('home.php', [
+            'title' => 'Home',
+            'message' => 'Welcome main page'
+        ]);
     }
 
     public function notFound()
     {
-        $title = 'Not found';
-        include $this->templatesDir.'not-found.php';
+        $this->render('not-found.php', [
+            'title' => 'Not found'
+        ]);
     }
 
 }

@@ -2,7 +2,6 @@
 /** @var array $data */
 /** @var string $error */
 ?>
-<?php ob_start(); ?>
 
 <h1>Вход</h1>
 
@@ -27,11 +26,6 @@
 </form>
 
 <?php if ($error): ?>
-	<p style="color: red"><?= $error ?></p>
+	<p class="error"><?= $error ?></p>
 <?php endif; ?>
 
-
-
-<?php $content = ob_get_clean(); ?>
-
-<?php include 'layout.php' ?>
