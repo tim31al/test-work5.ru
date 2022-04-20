@@ -1,6 +1,6 @@
 # test-work5.ru
 
-git clone my_dir
+git clone git@github.com:tim31al/test-work5.ru.git my_dir
 
 cd my_dir
 
@@ -12,7 +12,9 @@ docker-compose exec -u app app php bin/init.php
 
 ## run without docker
 
-php bin/init.php
+Для подключения к базе изменить значения в config/settings.php
+
+Инициализация базы php bin/init.php
 
 cd public
 
